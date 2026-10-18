@@ -32,7 +32,7 @@ wwwroot/lib/*
 !wwwroot/lib/**/
 .DS_Store
 Thumbs.db
-desktop.ini
+desktop.ini     
 
 wwwroot/uploads/*
 !wwwroot/uploads/.gitkeep
