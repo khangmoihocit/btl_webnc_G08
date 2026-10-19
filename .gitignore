@@ -36,3 +36,5 @@ desktop.ini
 
 wwwroot/uploads/*
 !wwwroot/uploads/.gitkeep
+
+txt/
