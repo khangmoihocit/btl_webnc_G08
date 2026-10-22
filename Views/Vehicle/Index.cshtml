@@ -1,0 +1,615 @@
+@using btl_webnc_G08.Models.Entities
+@using static btl_webnc_G08.Models.Enums.AppEnums
+@{
+    ViewData["Title"] = "Quản lý Phương tiện";
+    var categories = ViewBag.Categories as List<VehicleCategory> ?? new List<VehicleCategory>();
+    var communities = ViewBag.Communities as List<Community> ?? new List<Community>();
+    var users = ViewBag.Users as IEnumerable<dynamic> ?? new List<dynamic>();
+}
+
+<div class="container-fluid py-3">
+    <!-- Header & Action Buttons -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom">
+        <div>
+            <h2 class="h3 fw-bold text-primary mb-1">
+                <i class="bi bi-bicycle me-2"></i>Quản lý Phương tiện
+            </h2>
+            <p class="text-muted small mb-0">Hệ thống quản lý và chia sẻ phương tiện nội khu dân cư (Hybrid MVC + AJAX)</p>
+        </div>
+        <div class="mt-2 mt-md-0">
+            <button type="button" class="btn btn-primary shadow-sm" onclick="openCreateModal()">
+                <i class="bi bi-plus-circle me-1"></i> + Thêm phương tiện mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert thông báo nổi -->
+    <div id="alertContainer"></div>
+
+    <!-- Bộ lọc & Tìm kiếm -->
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body">
+            <form id="filterForm" class="row g-2 align-items-center" onsubmit="event.preventDefault(); loadVehicles();">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Từ khóa tìm kiếm</label>
+                    <input type="text" id="filterKeyword" class="form-control form-control-sm" placeholder="Tên xe, mô tả...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Danh mục</label>
+                    <select id="filterCategory" class="form-select form-select-sm">
+                        <option value="">-- Tất cả danh mục --</option>
+                        @foreach (var c in categories)
+                        {
+                            <option value="@c.Id">@c.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Khu dân cư</label>
+                    <select id="filterCommunity" class="form-select form-select-sm">
+                        <option value="">-- Tất cả khu dân cư --</option>
+                        @foreach (var com in communities)
+                        {
+                            <option value="@com.Id">@com.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Trạng thái</label>
+                    <select id="filterStatus" class="form-select form-select-sm">
+                        <option value="">-- Tất cả --</option>
+                        <option value="Available">Sẵn sàng</option>
+                        <option value="InUse">Đang sử dụng</option>
+                        <option value="Maintenance">Bảo trì</option>
+                        <option value="Inactive">Ngừng hoạt động</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end pt-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" title="Đặt lại bộ lọc" onclick="resetFilter()">
+                        Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách phương tiện -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold text-dark">
+                Danh sách phương tiện (<span id="totalCount">0</span>)
+            </h6>
+            <button class="btn btn-sm btn-outline-primary" onclick="loadVehicles()">
+                <i class="bi bi-arrow-clockwise"></i> Tải lại
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">#</th>
+                            <th style="width: 90px;" class="text-center">Ảnh</th>
+                            <th>Tên phương tiện</th>
+                            <th>Danh mục</th>
+                            <th>Chủ sở hữu & Khu vực</th>
+                            <th>Hình thức & Giá</th>
+                            <th>Trạng thái</th>
+                            <th style="width: 190px;" class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicleTableBody">
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                Đang tải danh sách phương tiện...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CHI TIẾT PHƯƠNG TIỆN -->
+<div class="modal fade" id="vehicleDetailModal" tabindex="-1" aria-labelledby="vehicleDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="vehicleDetailModalLabel">Chi tiết phương tiện</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body" id="vehicleDetailBody">
+                <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- MODAL THÊM / CẬP NHẬT PHƯƠNG TIỆN -->
+<!-- ============================================================== -->
+<div class="modal fade" id="vehicleModal" tabindex="-1" aria-labelledby="vehicleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="vehicleModalLabel">Thêm mới phương tiện</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Vùng thông báo lỗi trong modal -->
+                <div id="modalAlert" class="alert alert-danger d-none" role="alert"></div>
+
+                <form id="vehicleForm">
+                    <input type="hidden" id="vehicleId" value="0" />
+
+                    <div class="row g-3">
+                        <!-- Tên xe -->
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Tên phương tiện <span class="text-danger">*</span></label>
+                            <input type="text" id="vehicleName" class="form-control" required placeholder="VD: Xe máy Honda Vision 2023" />
+                        </div>
+
+                        <!-- Danh mục -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Danh mục <span class="text-danger">*</span></label>
+                            <select id="vehicleCategory" class="form-select" required>
+                                <option value="">-- Chọn danh mục --</option>
+                                @foreach (var c in categories)
+                                {
+                                    <option value="@c.Id">@c.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Chủ xe -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Chủ sở hữu <span class="text-danger">*</span></label>
+                            <select id="vehicleOwner" class="form-select" required>
+                                <option value="">-- Chọn chủ sở hữu --</option>
+                                @foreach (var u in users)
+                                {
+                                    <option value="@u.Id">@u.FullName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Khu dân cư -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Khu dân cư / Cộng đồng <span class="text-danger">*</span></label>
+                            <select id="vehicleCommunity" class="form-select" required>
+                                <option value="">-- Chọn khu dân cư --</option>
+                                @foreach (var com in communities)
+                                {
+                                    <option value="@com.Id">@com.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Hình thức chia sẻ -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Hình thức chia sẻ</label>
+                            <select id="vehicleShareType" class="form-select" onchange="togglePriceInput()">
+                                <option value="Free">Miễn phí (Free)</option>
+                                <option value="Rental">Cho thuê (Rental)</option>
+                            </select>
+                        </div>
+
+                        <!-- Giá thuê -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Giá thuê (VNĐ)</label>
+                            <input type="number" id="vehiclePrice" class="form-control" value="0" min="0" step="1000" disabled />
+                            <small class="text-muted">Chỉ áp dụng khi hình thức là "Cho thuê"</small>
+                        </div>
+
+                        <!-- Trạng thái -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Trạng thái</label>
+                            <select id="vehicleStatus" class="form-select">
+                                <option value="Available">Sẵn sàng (Available)</option>
+                                <option value="PendingApproval">Chờ duyệt (PendingApproval)</option>
+                                <option value="Reserved">Đã đặt trước (Reserved)</option>
+                                <option value="InUse">Đang sử dụng (InUse)</option>
+                                <option value="Maintenance">Bảo trì (Maintenance)</option>
+                                <option value="Inactive">Ngừng hoạt động (Inactive)</option>
+                            </select>
+                        </div>
+
+                        <!-- Tình trạng kỹ thuật -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tình trạng thực tế</label>
+                            <input type="text" id="vehicleCondition" class="form-control" placeholder="VD: Mới 95%, lốp mới thay..." />
+                        </div>
+
+                        <!-- Đường dẫn ảnh -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Đường dẫn hình ảnh (URL)</label>
+                            <input type="url" id="vehicleImageUrl" class="form-control" placeholder="https://example.com/hinh-anh-xe.jpg" oninput="previewImage(this.value)" />
+                            <div class="mt-2 text-center">
+                                <img id="imagePreview" src="" alt="Xem trước ảnh" class="img-thumbnail d-none" style="max-height: 120px;" />
+                            </div>
+                        </div>
+
+                        <!-- Mô tả chi tiết -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Mô tả chi tiết</label>
+                            <textarea id="vehicleDescription" class="form-control" rows="3" placeholder="Thông tin thêm về địa điểm nhận xe, lưu ý khi mượn/thuê..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="btnSaveVehicle" onclick="saveVehicle()">
+                    <span id="btnSaveSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    <span id="btnSaveText">Lưu dữ liệu</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Modal bootstrap instance
+        let vehicleModalInstance = null;
+        let vehicleDetailModalInstance = null;
+
+        $(document).ready(function () {
+            vehicleModalInstance = new bootstrap.Modal(document.getElementById('vehicleModal'));
+            vehicleDetailModalInstance = new bootstrap.Modal(document.getElementById('vehicleDetailModal'));
+            loadVehicles();
+
+            // Lắng nghe sự kiện gõ tìm kiếm với debounce nhẹ
+            let timeout = null;
+            $('#filterKeyword').on('keyup', function () {
+                clearTimeout(timeout);
+                timeout = setTimeout(loadVehicles, 300);
+            });
+            $('#filterCategory, #filterCommunity, #filterStatus').on('change', function () {
+                loadVehicles();
+            });
+        });
+
+        function loadVehicles() {
+            const categoryId = $('#filterCategory').val();
+            const communityId = $('#filterCommunity').val();
+            const status = $('#filterStatus').val();
+            const keyword = $('#filterKeyword').val();
+
+            $('#vehicleTableBody').html(`
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-muted">
+                        <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                        Đang tải danh sách...
+                    </td>
+                </tr>
+            `);
+
+            $.ajax({
+                url: '/Vehicle/GetAll',
+                type: 'GET',
+                data: {
+                    categoryId: categoryId,
+                    communityId: communityId,
+                    status: status,
+                    keyword: keyword
+                },
+                success: function (res) {
+                    if (res.success) {
+                        renderTable(res.data);
+                    } else {
+                        showAlert('danger', res.message || 'Lỗi khi tải dữ liệu!');
+                    }
+                },
+                error: function (xhr) {
+                    showAlert('danger', 'Không thể kết nối đến máy chủ.');
+                }
+            });
+        }
+
+        function renderTable(data) {
+            $('#totalCount').text(data.length);
+            if (!data || data.length === 0) {
+                $('#vehicleTableBody').html(`
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                            Không tìm thấy phương tiện nào phù hợp.
+                        </td>
+                    </tr>
+                `);
+                return;
+            }
+
+            let html = '';
+            data.forEach((item, index) => {
+                const imgTag = item.imageUrl 
+                    ? `<img src="${item.imageUrl}" class="rounded" style="width: 60px; height: 45px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/60x45?text=No+Img';">`
+                    : `<span class="badge bg-light text-secondary border p-2">Không ảnh</span>`;
+
+                const priceDisplay = item.shareType === 'Free' || item.price === 0
+                    ? `<span class="badge bg-success-subtle text-success border border-success-subtle">Miễn phí</span>`
+                    : `<strong>${Number(item.price).toLocaleString('vi-VN')} đ</strong>`;
+
+                let statusBadge = '<span class="badge bg-secondary">Không rõ</span>';
+                if (item.status === 'Available') {
+                    statusBadge = '<span class="badge bg-success">Sẵn sàng</span>';
+                } else if (item.status === 'InUse') {
+                    statusBadge = '<span class="badge bg-primary">Đang sử dụng</span>';
+                } else if (item.status === 'Maintenance') {
+                    statusBadge = '<span class="badge bg-warning text-dark">Bảo trì</span>';
+                } else if (item.status === 'PendingApproval') {
+                    statusBadge = '<span class="badge bg-info text-dark">Chờ duyệt</span>';
+                } else if (item.status === 'Inactive') {
+                    statusBadge = '<span class="badge bg-danger">Ngừng HĐ</span>';
+                } else if (item.status === 'Reserved') {
+                    statusBadge = '<span class="badge bg-secondary">Đã đặt</span>';
+                }
+
+                html += `
+                    <tr>
+                        <td class="text-center fw-semibold text-muted">${index + 1}</td>
+                        <td class="text-center">${imgTag}</td>
+                        <td>
+                            <div class="fw-bold text-dark">${escapeHtml(item.name)}</div>
+                            <small class="text-muted text-truncate d-block" style="max-width: 250px;">${escapeHtml(item.description || item.condition || 'Chưa có mô tả')}</small>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">${escapeHtml(item.categoryName)}</span></td>
+                        <td>
+                            <div><i class="bi bi-person me-1"></i>${escapeHtml(item.ownerName)}</div>
+                            <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${escapeHtml(item.communityName)}</small>
+                        </td>
+                        <td>${priceDisplay}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-info me-1" title="Xem chi tiết" onclick="openDetailModal(${item.id})">
+                                Chi tiết
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary me-1" title="Chỉnh sửa" onclick="openEditModal(${item.id})">
+                                Sửa
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Xóa" onclick="deleteVehicle(${item.id})">
+                                Xóa
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            $('#vehicleTableBody').html(html);
+        }
+
+        function openDetailModal(id) {
+            $('#vehicleDetailBody').html('<div class="text-center py-4"><div class="spinner-border text-primary"></div><div class="mt-2 text-muted">Đang tải chi tiết...</div></div>');
+            vehicleDetailModalInstance.show();
+            $.get('/Vehicle/Details', { id: id })
+                .done(function (res) {
+                    if (!res.success) {
+                        $('#vehicleDetailBody').html(`<div class="alert alert-warning mb-0">${escapeHtml(res.message)}</div>`);
+                        return;
+                    }
+                    const v = res.data;
+                    const images = (v.images || []).map(url => `<img src="${escapeHtml(url)}" class="rounded border me-2 mb-2" style="width:110px;height:80px;object-fit:cover" onerror="this.remove()">`).join('');
+                    const price = v.shareType === 'Free' ? '<span class="badge bg-success">Miễn phí</span>' : `${Number(v.price).toLocaleString('vi-VN')} đ`;
+                    $('#vehicleDetailBody').html(`
+                        <div class="row g-4">
+                            <div class="col-md-5"><div class="bg-light rounded p-3 text-center min-vh-25">${images || '<span class="text-muted">Chưa có hình ảnh</span>'}</div></div>
+                            <div class="col-md-7">
+                                <h4 class="fw-bold mb-3">${escapeHtml(v.name)}</h4>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-5">Danh mục</dt><dd class="col-sm-7">${escapeHtml(v.categoryName)}</dd>
+                                    <dt class="col-sm-5">Chủ sở hữu</dt><dd class="col-sm-7">${escapeHtml(v.ownerName)}</dd>
+                                    <dt class="col-sm-5">Khu dân cư</dt><dd class="col-sm-7">${escapeHtml(v.communityName)}</dd>
+                                    <dt class="col-sm-5">Hình thức / giá</dt><dd class="col-sm-7">${escapeHtml(v.shareTypeName)} · ${price}</dd>
+                                    <dt class="col-sm-5">Trạng thái</dt><dd class="col-sm-7"><span class="badge bg-primary">${escapeHtml(v.statusName)}</span></dd>
+                                    <dt class="col-sm-5">Tình trạng</dt><dd class="col-sm-7">${escapeHtml(v.condition || 'Chưa cập nhật')}</dd>
+                                </dl>
+                            </div>
+                            <div class="col-12"><h6 class="fw-bold">Mô tả</h6><p class="text-muted mb-0">${escapeHtml(v.description || 'Chưa có mô tả.')}</p></div>
+                        </div>`);
+                })
+                .fail(function () { $('#vehicleDetailBody').html('<div class="alert alert-danger mb-0">Không thể tải chi tiết phương tiện.</div>'); });
+        }
+
+        function openCreateModal() {
+            $('#vehicleModalLabel').text('Thêm mới phương tiện');
+            $('#modalAlert').addClass('d-none').html('');
+            $('#vehicleId').val('0');
+            $('#vehicleForm')[0].reset();
+            $('#vehiclePrice').val(0).prop('disabled', true);
+            $('#imagePreview').addClass('d-none').attr('src', '');
+            vehicleModalInstance.show();
+        }
+
+        function openEditModal(id) {
+            $('#vehicleModalLabel').text('Cập nhật phương tiện');
+            $('#modalAlert').addClass('d-none').html('');
+
+            $.ajax({
+                url: '/Vehicle/GetById',
+                type: 'GET',
+                data: { id: id },
+                success: function (res) {
+                    if (res.success && res.data) {
+                        const v = res.data;
+                        $('#vehicleId').val(v.id);
+                        $('#vehicleName').val(v.name);
+                        $('#vehicleCategory').val(v.categoryId);
+                        $('#vehicleOwner').val(v.ownerId);
+                        $('#vehicleCommunity').val(v.communityId);
+                        $('#vehicleShareType').val(v.shareType);
+                        $('#vehiclePrice').val(v.price);
+                        $('#vehicleStatus').val(v.status);
+                        $('#vehicleCondition').val(v.condition || '');
+                        $('#vehicleDescription').val(v.description || '');
+                        $('#vehicleImageUrl').val(v.imageUrl || '');
+
+                        togglePriceInput();
+                        previewImage(v.imageUrl);
+                        vehicleModalInstance.show();
+                    } else {
+                        showAlert('danger', res.message || 'Không thể lấy thông tin phương tiện!');
+                    }
+                },
+                error: function () {
+                    showAlert('danger', 'Lỗi khi gọi API lấy chi tiết phương tiện.');
+                }
+            });
+        }
+
+        function saveVehicle() {
+            const id = parseInt($('#vehicleId').val()) || 0;
+            const name = $('#vehicleName').val().trim();
+            const categoryId = parseInt($('#vehicleCategory').val());
+            const ownerId = $('#vehicleOwner').val();
+            const communityId = parseInt($('#vehicleCommunity').val());
+            const shareType = $('#vehicleShareType').val();
+            const price = parseFloat($('#vehiclePrice').val()) || 0;
+            const status = $('#vehicleStatus').val();
+            const condition = $('#vehicleCondition').val().trim();
+            const description = $('#vehicleDescription').val().trim();
+            const imageUrl = $('#vehicleImageUrl').val().trim();
+
+            if (!name) {
+                showModalAlert('Vui lòng nhập tên phương tiện.');
+                return;
+            }
+            if (!categoryId) {
+                showModalAlert('Vui lòng chọn danh mục phương tiện.');
+                return;
+            }
+            if (!ownerId) {
+                showModalAlert('Vui lòng chọn chủ sở hữu.');
+                return;
+            }
+            if (!communityId) {
+                showModalAlert('Vui lòng chọn khu dân cư.');
+                return;
+            }
+
+            const payload = {
+                id: id,
+                ownerId: ownerId,
+                categoryId: categoryId,
+                communityId: communityId,
+                name: name,
+                description: description,
+                condition: condition,
+                shareType: shareType,
+                price: shareType === 'Free' ? 0 : price,
+                status: status,
+                imageUrl: imageUrl
+            };
+
+            const isUpdate = id > 0;
+            const url = isUpdate ? '/Vehicle/Update' : '/Vehicle/Create';
+
+            setSaveButtonLoading(true);
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function (res) {
+                    setSaveButtonLoading(false);
+                    if (res.success) {
+                        vehicleModalInstance.hide();
+                        showAlert('success', res.message);
+                        loadVehicles();
+                    } else {
+                        let errHtml = res.message || 'Đã có lỗi xảy ra.';
+                        if (res.errors && res.errors.length > 0) {
+                            errHtml += '<br/>• ' + res.errors.join('<br/>• ');
+                        }
+                        showModalAlert(errHtml);
+                    }
+                },
+                error: function (xhr) {
+                    setSaveButtonLoading(false);
+                    showModalAlert('Lỗi xử lý trên máy chủ. Vui lòng thử lại.');
+                }
+            });
+        }
+
+        function deleteVehicle(id) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa phương tiện có mã #${id} không?`)) {
+                return;
+            }
+
+            $.ajax({
+                url: `/Vehicle/Delete?id=${id}`,
+                type: 'POST',
+                success: function (res) {
+                    if (res.success) {
+                        showAlert('success', res.message);
+                        loadVehicles();
+                    } else {
+                        showAlert('warning', res.message);
+                    }
+                },
+                error: function () {
+                    showAlert('danger', 'Lỗi khi kết nối đến máy chủ để xóa.');
+                }
+            });
+        }
+
+        function togglePriceInput() {
+            const shareType = $('#vehicleShareType').val();
+            if (shareType === 'Free') {
+                $('#vehiclePrice').val(0).prop('disabled', true);
+            } else {
+                $('#vehiclePrice').prop('disabled', false);
+            }
+        }
+
+        function previewImage(url) {
+            if (url && url.trim().length > 0) {
+                $('#imagePreview').attr('src', url.trim()).removeClass('d-none');
+            } else {
+                $('#imagePreview').addClass('d-none').attr('src', '');
+            }
+        }
+
+        function resetFilter() {
+            $('#filterForm')[0].reset();
+            loadVehicles();
+        }
+
+        function showAlert(type, message) {
+            const html = `
+                <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            $('#alertContainer').html(html);
+            setTimeout(function () {
+                $('#alertContainer .alert').alert('close');
+            }, 5000);
+        }
+
+        function showModalAlert(htmlMessage) {
+            $('#modalAlert').html(htmlMessage).removeClass('d-none');
+        }
+
+        function setSaveButtonLoading(loading) {
+            if (loading) {
+                $('#btnSaveSpinner').removeClass('d-none');
+                $('#btnSaveText').text('Đang lưu...');
+                $('#btnSaveVehicle').prop('disabled', true);
+            } else {
+                $('#btnSaveSpinner').addClass('d-none');
+                $('#btnSaveText').text('Lưu dữ liệu');
+                $('#btnSaveVehicle').prop('disabled', false);
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return $('<div>').text(text).html();
+        }
+    </script>
+}
