@@ -58,7 +58,6 @@ namespace btl_webnc_G08.Data
             }
             catch
             {
-                // Bỏ qua an toàn nếu bảng chưa được tạo hoặc chưa chạy migration
             }
         }
     }
