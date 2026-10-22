@@ -19,10 +19,6 @@ namespace btl_webnc_G08.Controllers
         {
             _context = context;
         }
-
-        // ==========================================
-        // 1. GIAO DIỆN CHÍNH (MVC VIEW)
-        // ==========================================
         public async Task<IActionResult> Index()
         {
             ViewBag.Categories = await _context.VehicleCategories
@@ -43,9 +39,6 @@ namespace btl_webnc_G08.Controllers
             return View();
         }
 
-        // ==========================================
-        // 2. API / AJAX CỤC BỘ: LẤY DANH SÁCH (READ)
-        // ==========================================
         [HttpGet]
         public async Task<IActionResult> GetAll(int? categoryId, int? communityId, VehicleStatus? status, string? keyword)
         {
@@ -103,9 +96,6 @@ namespace btl_webnc_G08.Controllers
             return Json(new { success = true, data = vehicles });
         }
 
-        // ==========================================
-        // 2.1 API / AJAX: LẤY CHI TIẾT 1 PHƯƠNG TIỆN
-        // ==========================================
         [HttpGet]
         public async Task<IActionResult> GetById(int id)
         {
@@ -136,9 +126,6 @@ namespace btl_webnc_G08.Controllers
             return Json(new { success = true, data = model });
         }
 
-        // ==========================================
-        // 2.2 API / AJAX: CHI TIẾT PHƯƠNG TIỆN
-        // ==========================================
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -184,9 +171,6 @@ namespace btl_webnc_G08.Controllers
             });
         }
 
-        // ==========================================
-        // 3. API / AJAX CỤC BỘ: THÊM MỚI (CREATE)
-        // ==========================================
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] VehicleFormVM model)
         {
@@ -246,9 +230,6 @@ namespace btl_webnc_G08.Controllers
             return Json(new { success = true, message = "Thêm mới phương tiện thành công!" });
         }
 
-        // ==========================================
-        // 4. API / AJAX CỤC BỘ: CẬP NHẬT (UPDATE)
-        // ==========================================
         [HttpPost]
         public async Task<IActionResult> Update([FromBody] VehicleFormVM model)
         {
@@ -302,9 +283,6 @@ namespace btl_webnc_G08.Controllers
             return Json(new { success = true, message = "Cập nhật phương tiện thành công!" });
         }
 
-        // ==========================================
-        // 5. API / AJAX CỤC BỘ: XÓA (DELETE)
-        // ==========================================
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
