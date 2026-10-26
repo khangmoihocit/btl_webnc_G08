@@ -24,6 +24,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
+        context.Database.Migrate();
         DbInitializer.Seed(context);
     }
     catch (Exception ex)

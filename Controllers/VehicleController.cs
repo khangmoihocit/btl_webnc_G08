@@ -19,7 +19,26 @@ namespace btl_webnc_G08.Controllers
         {
             _context = context;
         }
+
+        // Trang Tìm phương tiện (Customer Marketplace / Discovery)
         public async Task<IActionResult> Index()
+        {
+            ViewBag.Categories = await _context.VehicleCategories
+                .AsNoTracking()
+                .Where(c => c.IsActive)
+                .ToListAsync();
+
+            ViewBag.Communities = await _context.Communities
+                .AsNoTracking()
+                .Where(c => c.IsActive)
+                .ToListAsync();
+
+            return View();
+        }
+
+        // Trang Quản lý phương tiện (Dành cho Quản trị viên / Chủ xe)
+        [HttpGet]
+        public async Task<IActionResult> Manage()
         {
             ViewBag.Categories = await _context.VehicleCategories
                 .AsNoTracking()
@@ -40,7 +59,7 @@ namespace btl_webnc_G08.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(int? categoryId, int? communityId, VehicleStatus? status, string? keyword)
+        public async Task<IActionResult> GetAll(int? categoryId, int? communityId, VehicleStatus? status, string? keyword, ShareType? shareType, string? sortBy)
         {
             var query = _context.Vehicles
                 .AsNoTracking()
@@ -65,15 +84,38 @@ namespace btl_webnc_G08.Controllers
                 query = query.Where(v => v.Status == status.Value);
             }
 
+            if (shareType.HasValue)
+            {
+                query = query.Where(v => v.ShareType == shareType.Value);
+            }
+
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 var kw = keyword.Trim().ToLower();
                 query = query.Where(v => v.Name.ToLower().Contains(kw) || 
-                                         (v.Description != null && v.Description.ToLower().Contains(kw)));
+                                         (v.Description != null && v.Description.ToLower().Contains(kw)) ||
+                                         (v.Community != null && v.Community.Name.ToLower().Contains(kw)));
+            }
+
+            // Sắp xếp
+            if (sortBy == "price_asc")
+            {
+                query = query.OrderBy(v => v.Price);
+            }
+            else if (sortBy == "price_desc")
+            {
+                query = query.OrderByDescending(v => v.Price);
+            }
+            else if (sortBy == "name")
+            {
+                query = query.OrderBy(v => v.Name);
+            }
+            else
+            {
+                query = query.OrderByDescending(v => v.Id);
             }
 
             var vehicles = await query
-                .OrderByDescending(v => v.Id)
                 .Select(v => new VehicleItemVM
                 {
                     Id = v.Id,

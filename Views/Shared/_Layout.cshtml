@@ -1,50 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - btl_webnc_G08</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - ShareRide - Chia sẻ phương tiện nội khu</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="@(ViewData["Description"] ?? "ShareRide - Nền tảng chia sẻ và cho thuê phương tiện ô tô, xe máy nội khu dân cư, chung cư hàng đầu Việt Nam. Tiết kiệm, an toàn và kết nối cộng đồng.")" />
+    <meta name="keywords" content="@(ViewData["Keywords"] ?? "chia sẻ xe, thuê xe ô tô, thuê xe máy, xe tự lái nội khu, thuê xe chung cư, ShareRide, car sharing, thuê xe điện")" />
+    <meta name="robots" content="@(ViewData["Robots"] ?? "index, follow, max-image-preview:large")" />
+    <meta name="author" content="ShareRide Vietnam" />
+    <meta name="theme-color" content="#0066FF" />
+    <link rel="canonical" href="@(ViewData["Canonical"] ?? Context.Request.Scheme + "://" + Context.Request.Host + Context.Request.Path)" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="ShareRide" />
+    <meta property="og:title" content="@(ViewData["Title"] ?? "ShareRide - Chia sẻ phương tiện")" />
+    <meta property="og:description" content="@(ViewData["Description"] ?? "Nền tảng hỗ trợ cư dân trong khu dân cư chia sẻ, thuê ô tô và xe máy nhanh chóng, an toàn và minh bạch.")" />
+    <meta property="og:image" content="@Url.Content("~/images/hero-banner.png")" />
+    <meta property="og:url" content="@(Context.Request.Scheme + "://" + Context.Request.Host + Context.Request.Path)" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@(ViewData["Title"] ?? "ShareRide - Chia sẻ phương tiện")" />
+    <meta name="twitter:description" content="@(ViewData["Description"] ?? "Nền tảng hỗ trợ cư dân chia sẻ, thuê ô tô và xe máy an toàn, minh bạch.")" />
+    <meta name="twitter:image" content="@Url.Content("~/images/hero-banner.png")" />
+
+    <!-- Schema.org Organization & WebSite JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "WebSite",
+      "name": "ShareRide",
+      "alternateName": "Hệ thống chia sẻ phương tiện nội khu",
+      "url": "@(Context.Request.Scheme + "://" + Context.Request.Host)/",
+      "potentialAction": {
+        "@@type": "SearchAction",
+        "target": {
+          "@@type": "EntryPoint",
+          "urlTemplate": "@(Context.Request.Scheme + "://" + Context.Request.Host)/Vehicle?keyword={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Google Fonts & Assets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/btl_webnc_G08.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">btl_webnc_G08</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+    <!-- HEADER & NAVBAR -->
+    <header class="sticky-top shadow-sm bg-white">
+        <nav class="navbar navbar-expand-lg sr-navbar" aria-label="Điều hướng chính">
+            <div class="container">
+                <!-- Brand Logo -->
+                <a class="navbar-brand d-flex align-items-center me-3 me-lg-4" asp-area="" asp-controller="Home" asp-action="Index">
+                    <div class="sr-logo-icon me-2" aria-hidden="true">
+                        <i class="bi bi-car-front-fill"></i>
+                    </div>
+                    <div>
+                        <div class="sr-brand-title">ShareRide</div>
+                        <div class="sr-brand-slogan">Chia sẻ phương tiện - Kết nối cộng đồng</div>
+                    </div>
+                </a>
+
+                <!-- Mobile Actions & Toggle Button -->
+                <div class="d-flex align-items-center d-lg-none ms-auto gap-2">
+                    <a href="/Vehicle" class="btn btn-light btn-sm rounded-circle p-2 text-dark" aria-label="Tìm kiếm xe">
+                        <i class="bi bi-search"></i>
+                    </a>
+                    <button class="navbar-toggler border-0 p-2 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarShareRide" aria-controls="navbarShareRide" aria-expanded="false" aria-label="Mở menu điều hướng">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+
+                <!-- Navbar Links & Desktop Actions -->
+                <div class="collapse navbar-collapse" id="navbarShareRide">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 py-2 py-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link sr-nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark fw-semibold text-primary" asp-area="" asp-controller="Vehicle" asp-action="Index">🚗 Quản lý Phương tiện</a>
+                            <a class="nav-link sr-nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Vehicle" ? "active" : "")" asp-area="" asp-controller="Vehicle" asp-action="Index">Tìm phương tiện</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link sr-nav-link" href="/#huong-dan">Hướng dẫn</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link sr-nav-link" href="#bang-gia">Bảng giá</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link sr-nav-link" href="#tin-tuc">Tin tức</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link sr-nav-link" href="#lien-he">Liên hệ</a>
                         </li>
                     </ul>
+
+                    <!-- Right Side Actions -->
+                    <div class="sr-header-actions d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 pt-3 pt-lg-0 border-top border-lg-0">
+                        <!-- Desktop Search Icon -->
+                        <a href="/Vehicle" class="text-dark p-2 text-decoration-none d-none d-lg-inline-block" title="Tìm kiếm" aria-label="Tìm kiếm phương tiện">
+                            <i class="bi bi-search fs-5"></i>
+                        </a>
+
+                        <!-- Notification Bell with Badge -->
+                        <div class="dropdown d-none d-lg-block">
+                            <button class="btn btn-link text-dark p-2 position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Thông báo hệ thống">
+                                <i class="bi bi-bell fs-5"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; margin-left: -6px; margin-top: 10px;">
+                                    1
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="notifDropdown" style="width: 280px; font-size: 0.85rem;">
+                                <li class="dropdown-header fw-bold text-dark">Thông báo</li>
+                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-info-circle text-primary me-2"></i>Chào mừng bạn đến với ShareRide!</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Auth Buttons -->
+                        <div class="d-flex align-items-center gap-2 w-100">
+                            <a href="/Identity/Account/Login" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold flex-grow-1 flex-lg-grow-0 text-center" style="font-size: 0.875rem;">Đăng nhập</a>
+                            <a href="/Identity/Account/Register" class="btn btn-primary rounded-pill px-3 py-2 fw-semibold text-white flex-grow-1 flex-lg-grow-0 text-center" style="font-size: 0.875rem;">Đăng ký</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
+    <!-- MAIN BODY -->
+    <main id="main-content" role="main">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="sr-footer" role="contentinfo">
         <div class="container">
-            &copy; 2026 - btl_webnc_G08 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row g-4 mb-4 mb-lg-5">
+                <!-- Col 1: Brand Info -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="sr-logo-icon me-2" style="background: rgba(255,255,255,0.1); color: #38bdf8;" aria-hidden="true">
+                            <i class="bi bi-car-front-fill"></i>
+                        </div>
+                        <div>
+                            <div class="sr-brand-title text-white">ShareRide</div>
+                            <div class="sr-brand-slogan text-white-50">Chia sẻ phương tiện - Kết nối cộng đồng</div>
+                        </div>
+                    </div>
+                    <p class="mb-4" style="line-height: 1.6; font-size: 0.875rem; color: #94a3b8;">
+                        Nền tảng chia sẻ phương tiện dành cho cư dân trong khu dân cư/chung cư. Cùng xây dựng cộng đồng văn minh, an toàn và bền vững.
+                    </p>
+                    <div class="d-flex align-items-center gap-1">
+                        <a href="#" class="sr-social-btn" title="Facebook" aria-label="Trang Facebook ShareRide"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="sr-social-btn" title="Chat / Zalo" aria-label="Kênh hỗ trợ Chat Zalo"><i class="bi bi-chat-dots-fill"></i></a>
+                        <a href="#" class="sr-social-btn" title="Youtube" aria-label="Kênh Youtube ShareRide"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Col 2: Quick Links -->
+                <div class="col-6 col-sm-6 col-md-3 col-lg-2">
+                    <h6 class="sr-footer-title">Liên kết nhanh</h6>
+                    <ul class="sr-footer-links">
+                        <li><a asp-controller="Home" asp-action="Index"><i class="bi bi-chevron-right small me-1"></i>Trang chủ</a></li>
+                        <li><a asp-controller="Vehicle" asp-action="Index"><i class="bi bi-chevron-right small me-1"></i>Tìm phương tiện</a></li>
+                        <li><a asp-controller="Vehicle" asp-action="Manage"><i class="bi bi-chevron-right small me-1"></i>Quản lý xe (Admin)</a></li>
+                        <li><a href="/#huong-dan"><i class="bi bi-chevron-right small me-1"></i>Hướng dẫn</a></li>
+                        <li><a href="#bang-gia"><i class="bi bi-chevron-right small me-1"></i>Bảng giá</a></li>
+                        <li><a href="#tin-tuc"><i class="bi bi-chevron-right small me-1"></i>Tin tức</a></li>
+                        <li><a href="#lien-he"><i class="bi bi-chevron-right small me-1"></i>Liên hệ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Customer Support -->
+                <div class="col-6 col-sm-6 col-md-3 col-lg-3">
+                    <h6 class="sr-footer-title">Hỗ trợ khách hàng</h6>
+                    <ul class="sr-footer-links">
+                        <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Câu hỏi thường gặp</a></li>
+                        <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Chính sách bảo mật</a></li>
+                        <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Điều khoản dịch vụ</a></li>
+                        <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Quy định cộng đồng</a></li>
+                        <li><a href="#"><i class="bi bi-chevron-right small me-1"></i>Liên hệ hỗ trợ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: App Download -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <h6 class="sr-footer-title">Tải ứng dụng</h6>
+                    <p class="mb-3" style="font-size: 0.875rem; color: #94a3b8;">Trải nghiệm tốt hơn trên ứng dụng di động iOS và Android</p>
+                    <div class="d-flex flex-row flex-md-column flex-wrap gap-2" style="max-width: 320px;">
+                        <!-- Google Play -->
+                        <a href="#" class="btn btn-dark d-inline-flex align-items-center py-2 px-3 border border-secondary text-white text-decoration-none rounded-3" style="background:#090e17;" aria-label="Tải về từ Google Play">
+                            <i class="bi bi-google-play fs-4 me-2 text-warning"></i>
+                            <div class="text-start lh-1">
+                                <small class="d-block text-secondary" style="font-size: 0.6rem; text-transform: uppercase;">Get it on</small>
+                                <span class="fw-bold" style="font-size: 0.85rem;">Google Play</span>
+                            </div>
+                        </a>
+                        <!-- App Store -->
+                        <a href="#" class="btn btn-dark d-inline-flex align-items-center py-2 px-3 border border-secondary text-white text-decoration-none rounded-3" style="background:#090e17;" aria-label="Tải về từ Apple App Store">
+                            <i class="bi bi-apple fs-4 me-2 text-white"></i>
+                            <div class="text-start lh-1">
+                                <small class="d-block text-secondary" style="font-size: 0.6rem; text-transform: uppercase;">Download on the</small>
+                                <span class="fw-bold" style="font-size: 0.85rem;">App Store</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="pt-4 border-top border-secondary border-opacity-25 d-flex flex-wrap justify-content-between align-items-center gap-2" style="font-size: 0.825rem; color: #64748b;">
+                <div>
+                    &copy; 2026 ShareRide. Nền tảng chia sẻ phương tiện văn minh. Tất cả quyền được bảo lưu.
+                </div>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-decoration-none text-secondary">Bảo mật</a>
+                    <a href="#" class="text-decoration-none text-secondary">Điều khoản</a>
+                    <a href="#" class="text-decoration-none text-secondary">Trợ giúp</a>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
