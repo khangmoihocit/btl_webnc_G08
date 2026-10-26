@@ -38,3 +38,4 @@ wwwroot/uploads/*
 !wwwroot/uploads/.gitkeep
 
 txt/
+Migrations/

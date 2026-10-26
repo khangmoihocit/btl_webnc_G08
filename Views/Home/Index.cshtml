@@ -1,8 +1,330 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Trang chủ - Nền tảng chia sẻ xe nội khu dân cư";
+    ViewData["Description"] = "ShareRide - Nền tảng chia sẻ và cho thuê ô tô, xe máy văn minh tại các khu dân cư, chung cư. Tiết kiệm chi phí, an toàn tuyệt đối và bảo vệ môi trường.";
+    ViewData["Keywords"] = "thuê xe ô tô, thuê xe máy, chia sẻ xe, share ride, thuê xe chung cư, xe tự lái, xe điện nội khu";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Schema.org AutoRental Structured Data -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "AutoRental",
+  "name": "ShareRide - Chia sẻ phương tiện nội khu",
+  "description": "Nền tảng hỗ trợ cư dân trong khu dân cư chia sẻ và thuê xe ô tô, xe máy an toàn, minh bạch.",
+  "url": "@(Context.Request.Scheme + "://" + Context.Request.Host)",
+  "priceRange": "50.000đ - 1.500.000đ",
+  "areaServed": "Việt Nam",
+  "knowsAbout": ["Cho thuê xe ô tô", "Cho thuê xe máy", "Chia sẻ xe điện nội khu"]
+}
+</script>
+
+<!-- ============================================================== -->
+<!-- 1. HERO BANNER SECTION -->
+<!-- ============================================================== -->
+<section class="hero-section" aria-label="Banner giới thiệu và tìm kiếm xe">
+    <div class="container py-3">
+        <!-- Headings & Description on Left -->
+        <div class="mb-4" style="max-width: 640px;">
+            <h1 class="hero-title-main mb-3">
+                Chia sẻ phương tiện
+                <span class="d-block hero-title-sub">Kết nối cộng đồng văn minh</span>
+            </h1>
+            <p class="hero-description mb-0">
+                Nền tảng hỗ trợ cư dân trong khu dân cư/chung cư chia sẻ, thuê và cho thuê ô tô, xe máy một cách an toàn, tiện lợi và minh bạch.
+            </p>
+        </div>
+
+        <!-- Wide Search Card matching the mockup (Căn giữa) -->
+        <div class="hero-search-card mx-auto">
+            <!-- Category Tabs -->
+            <div class="d-flex align-items-center gap-2 mb-3 overflow-auto pb-1" style="white-space: nowrap;">
+                <button type="button" class="sr-search-tab active" data-type="all" onclick="selectSearchTab(this, 'all')" aria-label="Xem tất cả loại phương tiện">
+                    <i class="bi bi-car-front-fill me-1" aria-hidden="true"></i> Tất cả
+                </button>
+                <button type="button" class="sr-search-tab" data-type="car" onclick="selectSearchTab(this, 'car')" aria-label="Tìm xe ô tô">
+                    <i class="bi bi-car-front me-1" aria-hidden="true"></i> Ô tô
+                </button>
+                <button type="button" class="sr-search-tab" data-type="motorbike" onclick="selectSearchTab(this, 'motorbike')" aria-label="Tìm xe máy">
+                    <i class="bi bi-bicycle me-1" aria-hidden="true"></i> Xe máy
+                </button>
+            </div>
+
+            <!-- 4 Separate Input Boxes -->
+            <form action="/Vehicle" method="get" role="search" aria-label="Tìm kiếm phương tiện">
+                <input type="hidden" name="type" id="searchVehicleType" value="all" />
+                <div class="d-flex flex-column flex-lg-row align-items-stretch gap-3">
+                    <!-- Location -->
+                    <div class="sr-search-input-box" style="flex: 2.2;">
+                        <i class="bi bi-geo-alt text-secondary me-2 fs-5" aria-hidden="true"></i>
+                        <input type="text" name="keyword" class="sr-clean-input" placeholder="Nhập vị trí, khu dân cư, chung cư..." aria-label="Nhập vị trí, khu dân cư hoặc chung cư" />
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="sr-search-input-box" style="flex: 1.1;">
+                        <i class="bi bi-calendar3 text-secondary me-2" aria-hidden="true"></i>
+                        <input type="text" class="sr-clean-input" placeholder="Ngày bắt đầu" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" aria-label="Ngày bắt đầu thuê" />
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="sr-search-input-box" style="flex: 1.1;">
+                        <i class="bi bi-calendar3 text-secondary me-2" aria-hidden="true"></i>
+                        <input type="text" class="sr-clean-input" placeholder="Ngày kết thúc" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" aria-label="Ngày kết thúc thuê" />
+                    </div>
+
+                    <!-- Search Button -->
+                    <button type="submit" class="btn sr-btn-search" aria-label="Thực hiện tìm kiếm phương tiện">
+                        <i class="bi bi-search me-2" aria-hidden="true"></i>Tìm kiếm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- 2. CORE VALUE / FEATURE HIGHLIGHTS -->
+<!-- ============================================================== -->
+<section class="py-4 bg-white border-bottom" aria-labelledby="core-values-heading">
+    <div class="container">
+        <h2 id="core-values-heading" class="visually-hidden">Giá trị cốt lõi của nền tảng ShareRide</h2>
+        <div class="row g-3 g-md-4 align-items-stretch">
+            <!-- Feature 1: An toàn & Tin cậy -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="d-flex align-items-center p-2 rounded-3 h-100">
+                    <div class="sr-feature-circle me-3" style="background-color: #10b981;" aria-hidden="true">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">An toàn &amp; Tin cậy</h3>
+                        <p class="text-secondary small mb-0" style="line-height: 1.4;">Xác thực người dùng, đánh giá minh bạch từ cộng đồng cư dân.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2: Tiết kiệm chi phí -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="d-flex align-items-center p-2 rounded-3 h-100">
+                    <div class="sr-feature-circle me-3" style="background-color: #0284c7;" aria-hidden="true">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">Tiết kiệm chi phí</h3>
+                        <p class="text-secondary small mb-0" style="line-height: 1.4;">Tận dụng phương tiện nhàn rỗi, giảm đáng kể chi phí đi lại.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3: Kết nối cộng đồng -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="d-flex align-items-center p-2 rounded-3 h-100">
+                    <div class="sr-feature-circle me-3" style="background-color: #8b5cf6;" aria-hidden="true">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">Kết nối cộng đồng</h3>
+                        <p class="text-secondary small mb-0" style="line-height: 1.4;">Xây dựng cộng đồng cư dân thân thiện, tương trợ văn minh.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 4: Thân thiện môi trường -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="d-flex align-items-center p-2 rounded-3 h-100">
+                    <div class="sr-feature-circle me-3" style="background-color: #f59e0b;" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">Thân thiện môi trường</h3>
+                        <p class="text-secondary small mb-0" style="line-height: 1.4;">Tối ưu hóa phương tiện di chuyển, giảm khí thải và ùn tắc.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- 3. FEATURED VEHICLES SECTION -->
+<!-- ============================================================== -->
+<section class="py-5" style="background-color: #f8fafc;" aria-labelledby="featured-vehicles-heading">
+    <div class="container position-relative">
+        <!-- Section Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 id="featured-vehicles-heading" class="fw-bold text-dark mb-0 fs-4">Phương tiện nổi bật</h2>
+            <a asp-controller="Vehicle" asp-action="Index" class="text-primary fw-semibold text-decoration-none d-flex align-items-center" style="font-size: 0.9rem;">
+                Xem tất cả <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <!-- Carousel navigation buttons on desktop -->
+        <div class="d-none d-md-flex justify-content-between position-absolute top-50 start-0 end-0 px-2" style="transform: translateY(-50%); pointer-events: none; z-index: 2;">
+            <button class="btn btn-light rounded-circle shadow border p-0 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; pointer-events: auto; margin-left: -20px;" aria-label="Xem phương tiện nổi bật trước">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-light rounded-circle shadow border p-0 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; pointer-events: auto; margin-right: -20px;" aria-label="Xem phương tiện nổi bật tiếp theo">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <!-- 4 Vehicle Cards -->
+        <div class="row g-4">
+            <!-- Card 1: Toyota Vios 2022 -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <article class="sr-vehicle-card h-100">
+                    <div class="sr-vehicle-img-wrap">
+                        <img src="~/images/vehicles/toyota-vios.jpg" alt="Cho thuê xe ô tô Toyota Vios 2022 tại Chung cư Green Bay" loading="lazy" decoding="async" />
+                        <span class="sr-category-badge">Ô tô</span>
+                        <button class="sr-heart-btn" title="Yêu thích" aria-label="Thêm Toyota Vios vào danh sách yêu thích"><i class="bi bi-heart"></i></button>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="fw-bold text-dark mb-1 fs-6">Toyota Vios 2022</h3>
+                        <div class="fw-bold text-primary mb-2" style="font-size: 1.05rem;">700.000 đ/ngày</div>
+                        <div class="text-muted small mb-2 text-truncate">
+                            <i class="bi bi-geo-alt me-1 text-secondary" aria-hidden="true"></i>Chung cư Green Bay
+                        </div>
+                        <div class="d-flex align-items-center small">
+                            <i class="bi bi-star-fill text-warning me-1" aria-hidden="true"></i>
+                            <span class="fw-bold text-dark me-1">4.8</span>
+                            <span class="text-secondary">(12 đánh giá)</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Card 2: Honda Vision 2023 -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <article class="sr-vehicle-card h-100">
+                    <div class="sr-vehicle-img-wrap">
+                        <img src="~/images/vehicles/honda-vision.jpg" alt="Cho thuê xe máy Honda Vision 2023 tại Chung cư The Matrix One" loading="lazy" decoding="async" />
+                        <span class="sr-category-badge">Xe máy</span>
+                        <button class="sr-heart-btn" title="Yêu thích" aria-label="Thêm Honda Vision vào danh sách yêu thích"><i class="bi bi-heart"></i></button>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="fw-bold text-dark mb-1 fs-6">Honda Vision 2023</h3>
+                        <div class="fw-bold text-primary mb-2" style="font-size: 1.05rem;">120.000 đ/ngày</div>
+                        <div class="text-muted small mb-2 text-truncate">
+                            <i class="bi bi-geo-alt me-1 text-secondary" aria-hidden="true"></i>Chung cư The Matrix One
+                        </div>
+                        <div class="d-flex align-items-center small">
+                            <i class="bi bi-star-fill text-warning me-1" aria-hidden="true"></i>
+                            <span class="fw-bold text-dark me-1">4.9</span>
+                            <span class="text-secondary">(20 đánh giá)</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Card 3: Mazda CX-5 2021 -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <article class="sr-vehicle-card h-100">
+                    <div class="sr-vehicle-img-wrap">
+                        <img src="~/images/vehicles/mazda-cx5.jpg" alt="Cho thuê xe SUV Mazda CX-5 2021 tại KĐT Vinhomes Smart City" loading="lazy" decoding="async" />
+                        <span class="sr-category-badge">Ô tô</span>
+                        <button class="sr-heart-btn" title="Yêu thích" aria-label="Thêm Mazda CX-5 vào danh sách yêu thích"><i class="bi bi-heart"></i></button>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="fw-bold text-dark mb-1 fs-6">Mazda CX-5 2021</h3>
+                        <div class="fw-bold text-primary mb-2" style="font-size: 1.05rem;">900.000 đ/ngày</div>
+                        <div class="text-muted small mb-2 text-truncate">
+                            <i class="bi bi-geo-alt me-1 text-secondary" aria-hidden="true"></i>KĐT Vinhomes Smart City
+                        </div>
+                        <div class="d-flex align-items-center small">
+                            <i class="bi bi-star-fill text-warning me-1" aria-hidden="true"></i>
+                            <span class="fw-bold text-dark me-1">4.7</span>
+                            <span class="text-secondary">(15 đánh giá)</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Card 4: Yamaha NVX 2023 -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <article class="sr-vehicle-card h-100">
+                    <div class="sr-vehicle-img-wrap">
+                        <img src="~/images/vehicles/yamaha-nvx.jpg" alt="Cho thuê xe tay ga Yamaha NVX 2023 tại Chung cư EcoHome 3" loading="lazy" decoding="async" />
+                        <span class="sr-category-badge">Xe máy</span>
+                        <button class="sr-heart-btn" title="Yêu thích" aria-label="Thêm Yamaha NVX vào danh sách yêu thích"><i class="bi bi-heart"></i></button>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="fw-bold text-dark mb-1 fs-6">Yamaha NVX 2023</h3>
+                        <div class="fw-bold text-primary mb-2" style="font-size: 1.05rem;">150.000 đ/ngày</div>
+                        <div class="text-muted small mb-2 text-truncate">
+                            <i class="bi bi-geo-alt me-1 text-secondary" aria-hidden="true"></i>Chung cư EcoHome 3
+                        </div>
+                        <div class="d-flex align-items-center small">
+                            <i class="bi bi-star-fill text-warning me-1" aria-hidden="true"></i>
+                            <span class="fw-bold text-dark me-1">4.8</span>
+                            <span class="text-secondary">(18 đánh giá)</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- 4. HOW IT WORKS SECTION (Cách hoạt động) -->
+<!-- ============================================================== -->
+<section id="huong-dan" class="py-5 bg-white" aria-labelledby="how-it-works-heading">
+    <div class="container text-center">
+        <h2 id="how-it-works-heading" class="fw-bold text-dark mb-4 mb-md-5 fs-4">Cách thức hoạt động</h2>
+
+        <div class="row justify-content-center align-items-center g-4">
+            <!-- Step 1 -->
+            <div class="col-12 col-md-4 col-lg-3">
+                <div class="p-2">
+                    <div class="sr-step-circle" aria-hidden="true">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2 fs-6">1. Tìm kiếm</h3>
+                    <p class="text-secondary small mb-0 px-3">Chọn loại phương tiện, thời gian và vị trí thuận tiện nhất.</p>
+                </div>
+            </div>
+
+            <!-- Arrow Connector 1 -->
+            <div class="col-lg-1 d-none d-lg-block text-muted" aria-hidden="true">
+                <i class="bi bi-arrow-right fs-2"></i>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="col-12 col-md-4 col-lg-3">
+                <div class="p-2">
+                    <div class="sr-step-circle" aria-hidden="true">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2 fs-6">2. Đặt thuê</h3>
+                    <p class="text-secondary small mb-0 px-3">Gửi yêu cầu và xác nhận dễ dàng nhanh chóng với chủ xe.</p>
+                </div>
+            </div>
+
+            <!-- Arrow Connector 2 -->
+            <div class="col-lg-1 d-none d-lg-block text-muted" aria-hidden="true">
+                <i class="bi bi-arrow-right fs-2"></i>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="col-12 col-md-4 col-lg-3">
+                <div class="p-2">
+                    <div class="sr-step-circle" aria-hidden="true">
+                        <i class="bi bi-car-front"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2 fs-6">3. Sử dụng</h3>
+                    <p class="text-secondary small mb-0 px-3">Nhận phương tiện ngay trong khuôn viên và bắt đầu hành trình.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function selectSearchTab(element, type) {
+            $('.sr-search-tab').removeClass('active');
+            $(element).addClass('active');
+            $('#searchVehicleType').val(type);
+        }
+    </script>
+}

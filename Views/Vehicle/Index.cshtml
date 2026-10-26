@@ -1,0 +1,502 @@
+@using btl_webnc_G08.Models.Entities
+@using static btl_webnc_G08.Models.Enums.AppEnums
+@{
+    ViewData["Title"] = "Tìm phương tiện - Thuê ô tô & xe máy nội khu";
+    ViewData["Description"] = "Khám phá danh sách hơn 30+ xe ô tô, xe máy, xe điện sẵn sàng cho thuê và chia sẻ tại các khu dân cư. Giá thuê minh bạch, xe chất lượng, đặt thuê trực tuyến nhanh chóng.";
+    ViewData["Keywords"] = "tìm xe ô tô, tìm xe máy, thuê xe nội khu, thuê xe Vinhomes, thuê xe Green Bay, thuê xe tự lái, chia sẻ phương tiện";
+    var categories = ViewBag.Categories as List<VehicleCategory> ?? new List<VehicleCategory>();
+    var communities = ViewBag.Communities as List<Community> ?? new List<Community>();
+}
+
+<!-- Schema.org BreadcrumbList Structured Data -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@@type": "ListItem",
+      "position": 1,
+      "name": "Trang chủ",
+      "item": "@(Context.Request.Scheme + "://" + Context.Request.Host)/"
+    },
+    {
+      "@@type": "ListItem",
+      "position": 2,
+      "name": "Tìm phương tiện",
+      "item": "@(Context.Request.Scheme + "://" + Context.Request.Host)/Vehicle"
+    }
+  ]
+}
+</script>
+
+<!-- ============================================================== -->
+<!-- 1. BREADCRUMB & HEADER BANNER -->
+<!-- ============================================================== -->
+<section class="py-3 py-md-4 border-bottom" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);" aria-label="Đầu trang tìm kiếm">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2" style="font-size: 0.85rem;">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-secondary text-decoration-none"><i class="bi bi-house-door me-1" aria-hidden="true"></i>Trang chủ</a></li>
+                <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">Tìm phương tiện</li>
+            </ol>
+        </nav>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div>
+                <h1 class="h3 fw-bold text-dark mb-1">
+                    <i class="bi bi-car-front text-primary me-2" aria-hidden="true"></i>Tìm kiếm phương tiện nội khu
+                </h1>
+                <p class="text-secondary mb-0 small" style="max-width: 650px;">
+                    Duyệt và thuê các phương tiện sẵn có từ cộng đồng cư dân với chi phí tối ưu, minh bạch và an toàn tuyệt đối.
+                </p>
+            </div>
+            <div>
+                <a asp-controller="Vehicle" asp-action="Manage" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2 fw-medium text-nowrap">
+                    <i class="bi bi-gear me-1" aria-hidden="true"></i>Quản lý phương tiện
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- 2. FILTER & SEARCH SECTION (Sticky & Mobile Responsive) -->
+<!-- ============================================================== -->
+<section class="py-3 py-lg-4 bg-white border-bottom shadow-sm sticky-top sr-filter-bar" aria-labelledby="filter-heading">
+    <div class="container">
+        <h2 id="filter-heading" class="visually-hidden">Bộ lọc tìm kiếm phương tiện</h2>
+
+        <!-- Mobile Filter Toggle Button -->
+        <div class="d-lg-none mb-2">
+            <button class="btn btn-outline-primary w-100 d-flex justify-content-between align-items-center py-2 rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilterCollapse" aria-expanded="false" aria-controls="mobileFilterCollapse" aria-label="Mở bộ lọc tìm kiếm">
+                <span class="fw-semibold"><i class="bi bi-funnel me-2"></i>Bộ lọc tìm kiếm nâng cao</span>
+                <i class="bi bi-chevron-down"></i>
+            </button>
+        </div>
+
+        <!-- Filter Controls (Collapsible on Mobile, Expanded on Desktop) -->
+        <div class="collapse d-lg-block" id="mobileFilterCollapse">
+            <div class="row g-2 g-md-3 align-items-center pt-2 pt-lg-0">
+                <!-- Keyword search -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-secondary" id="search-icon-addon">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="marketSearchKeyword" class="form-control border-start-0 bg-light" placeholder="Tìm tên xe, dòng xe, khu vực..." aria-label="Tìm theo tên xe hoặc vị trí" aria-describedby="search-icon-addon" />
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <select id="marketFilterCategory" class="form-select bg-light" aria-label="Lọc theo danh mục phương tiện">
+                        <option value="">-- Tất cả danh mục --</option>
+                        @foreach (var c in categories)
+                        {
+                            <option value="@c.Id">@c.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Community Filter -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <select id="marketFilterCommunity" class="form-select bg-light" aria-label="Lọc theo khu dân cư">
+                        <option value="">-- Tất cả khu vực --</option>
+                        @foreach (var com in communities)
+                        {
+                            <option value="@com.Id">@com.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Share Type Filter -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <select id="marketFilterShareType" class="form-select bg-light" aria-label="Lọc theo hình thức thuê">
+                        <option value="">-- Hình thức --</option>
+                        <option value="Rental">Có phí (Cho thuê)</option>
+                        <option value="Free">Miễn phí (Free)</option>
+                    </select>
+                </div>
+
+                <!-- Reset Filter Button -->
+                <div class="col-12 col-md-4 col-lg-1">
+                    <button type="button" class="btn btn-outline-secondary w-100 py-2" title="Đặt lại bộ lọc" onclick="resetMarketFilter()" aria-label="Đặt lại toàn bộ bộ lọc">
+                        <i class="bi bi-arrow-counterclockwise me-1 d-lg-none"></i>
+                        <span class="d-lg-none small fw-semibold">Đặt lại</span>
+                        <i class="bi bi-arrow-counterclockwise d-none d-lg-inline"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Quick Pills (Touch-friendly smooth horizontal scroll) -->
+        <div class="sr-quick-pills mt-3">
+            <span class="small text-secondary fw-semibold me-1 d-flex align-items-center text-nowrap"><i class="bi bi-funnel me-1" aria-hidden="true"></i>Loại xe:</span>
+            <button type="button" class="btn btn-sm btn-primary text-white rounded-pill px-3 py-1 text-nowrap quick-cat-btn" data-cat-id="" onclick="filterByQuickCat(this, '')">
+                Tất cả
+            </button>
+            @foreach (var c in categories)
+            {
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 text-nowrap quick-cat-btn" data-cat-id="@c.Id" onclick="filterByQuickCat(this, '@c.Id')">
+                    @c.Name
+                </button>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- 3. VEHICLE RESULTS GRID -->
+<!-- ============================================================== -->
+<section class="py-4 py-md-5" style="background-color: #f8fafc; min-height: 500px;" aria-labelledby="results-heading">
+    <div class="container">
+        <h2 id="results-heading" class="visually-hidden">Danh sách phương tiện</h2>
+
+        <!-- Results stats & sort -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <div>
+                <span class="text-secondary">Tìm thấy</span>
+                <strong class="text-dark fs-5 mx-1" id="vehicleTotalCount">0</strong>
+                <span class="text-secondary">phương tiện</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <label for="marketSortBy" class="small text-secondary me-2 fw-semibold text-nowrap">Sắp xếp theo:</label>
+                <select id="marketSortBy" class="form-select form-select-sm" style="width: 175px;" onchange="loadMarketVehicles()" aria-label="Sắp xếp danh sách phương tiện">
+                    <option value="newest">Mới nhất</option>
+                    <option value="price_asc">Giá: Thấp đến cao</option>
+                    <option value="price_desc">Giá: Cao đến thấp</option>
+                    <option value="name">Tên A-Z</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Vehicle Grid Container -->
+        <div class="row g-3 g-md-4" id="vehicleGridContainer">
+            <!-- Loading placeholder -->
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div>
+                <div class="mt-3 text-secondary">Đang tải danh sách phương tiện...</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- 4. MODAL CHI TIẾT & ĐẶT THUÊ PHƯƠNG TIỆN -->
+<!-- ============================================================== -->
+<div class="modal fade" id="marketDetailModal" tabindex="-1" aria-labelledby="marketDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-white border-bottom py-3">
+                <h5 class="modal-title fw-bold text-dark" id="marketDetailModalLabel">Chi tiết phương tiện</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4" id="marketDetailContent">
+                <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let detailModalInstance = null;
+
+        $(document).ready(function () {
+            detailModalInstance = new bootstrap.Modal(document.getElementById('marketDetailModal'));
+
+            // Đọc keyword từ query url (khi chuyển từ trang chủ sang)
+            const urlParams = new URLSearchParams(window.location.search);
+            const kw = urlParams.get('keyword');
+            if (kw) {
+                $('#marketSearchKeyword').val(kw);
+            }
+
+            // Đọc loại xe nếu có
+            const type = urlParams.get('type');
+            if (type === 'car') {
+                selectCategoryByName('Ô tô');
+            } else if (type === 'motorbike') {
+                selectCategoryByName('Xe máy');
+            }
+
+            loadMarketVehicles();
+
+            // Lắng nghe tìm kiếm với debounce
+            let debounceTimer = null;
+            $('#marketSearchKeyword').on('keyup', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(loadMarketVehicles, 300);
+            });
+
+            $('#marketFilterCategory, #marketFilterCommunity, #marketFilterShareType').on('change', function () {
+                loadMarketVehicles();
+            });
+        });
+
+        function selectCategoryByName(name) {
+            $('#marketFilterCategory option').each(function () {
+                if ($(this).text().toLowerCase().includes(name.toLowerCase())) {
+                    $('#marketFilterCategory').val($(this).val());
+                    syncQuickPills($(this).val());
+                    return false;
+                }
+            });
+        }
+
+        function filterByQuickCat(btn, catId) {
+            $('.quick-cat-btn').removeClass('btn-primary text-white').addClass('btn-outline-secondary');
+            $(btn).removeClass('btn-outline-secondary').addClass('btn-primary text-white');
+            $('#marketFilterCategory').val(catId);
+            loadMarketVehicles();
+        }
+
+        function syncQuickPills(catId) {
+            $('.quick-cat-btn').removeClass('btn-primary text-white').addClass('btn-outline-secondary');
+            $(`.quick-cat-btn[data-cat-id="${catId}"]`).removeClass('btn-outline-secondary').addClass('btn-primary text-white');
+        }
+
+        function loadMarketVehicles() {
+            const categoryId = $('#marketFilterCategory').val();
+            const communityId = $('#marketFilterCommunity').val();
+            const shareType = $('#marketFilterShareType').val();
+            const keyword = $('#marketSearchKeyword').val();
+            const sortBy = $('#marketSortBy').val();
+
+            $('#vehicleGridContainer').html(`
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="mt-2 text-secondary small">Đang tìm kiếm phương tiện...</div>
+                </div>
+            `);
+
+            $.ajax({
+                url: '/Vehicle/GetAll',
+                type: 'GET',
+                data: {
+                    categoryId: categoryId,
+                    communityId: communityId,
+                    shareType: shareType,
+                    keyword: keyword,
+                    sortBy: sortBy
+                },
+                success: function (res) {
+                    if (res.success) {
+                        renderMarketGrid(res.data);
+                    } else {
+                        $('#vehicleGridContainer').html(`
+                            <div class="col-12 text-center py-5 text-danger">
+                                <i class="bi bi-exclamation-triangle fs-2 d-block mb-2"></i>
+                                Không thể tải danh sách phương tiện.
+                            </div>
+                        `);
+                    }
+                },
+                error: function () {
+                    $('#vehicleGridContainer').html(`
+                        <div class="col-12 text-center py-5 text-danger">
+                            <i class="bi bi-wifi-off fs-2 d-block mb-2"></i>
+                            Lỗi kết nối máy chủ.
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        function renderMarketGrid(items) {
+            $('#vehicleTotalCount').text(items ? items.length : 0);
+
+            if (!items || items.length === 0) {
+                $('#vehicleGridContainer').html(`
+                    <div class="col-12 text-center py-5">
+                        <div class="bg-white rounded-4 p-5 shadow-sm mx-auto" style="max-width: 450px;">
+                            <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
+                            <h5 class="fw-bold text-dark">Không tìm thấy phương tiện</h5>
+                            <p class="text-secondary small mb-3">Thử thay đổi từ khóa hoặc điều chỉnh bộ lọc để xem các xe khác đang có sẵn.</p>
+                            <button class="btn btn-outline-primary rounded-pill px-4 btn-sm" onclick="resetMarketFilter()">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại bộ lọc
+                            </button>
+                        </div>
+                    </div>
+                `);
+                return;
+            }
+
+            let html = '';
+            items.forEach(v => {
+                const img = v.imageUrl || 'https://placehold.co/600x400?text=Vehicle+Image';
+                const isFree = v.shareType === 'Free' || v.price === 0;
+                const priceFormatted = isFree 
+                    ? '<span class="text-success fw-bold">Miễn phí</span>' 
+                    : `<span class="text-primary fw-bold fs-5">${Number(v.price).toLocaleString('vi-VN')} đ</span><span class="text-muted small">/ngày</span>`;
+
+                const statusBadge = v.status === 'Available'
+                    ? '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill"><i class="bi bi-check-circle me-1" aria-hidden="true"></i>Sẵn sàng</span>'
+                    : '<span class="badge bg-secondary-subtle text-secondary rounded-pill">Đang sử dụng</span>';
+
+                html += `
+                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                        <article class="sr-vehicle-card h-100 d-flex flex-column">
+                            <div class="sr-vehicle-img-wrap" style="height: 180px;">
+                                <img src="${escapeHtml(img)}" alt="Cho thuê xe ${escapeHtml(v.name)} tại ${escapeHtml(v.communityName)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=ShareRide';" />
+                                <span class="sr-category-badge">${escapeHtml(v.categoryName)}</span>
+                                <button type="button" class="sr-heart-btn" title="Yêu thích" aria-label="Yêu thích xe ${escapeHtml(v.name)}" onclick="toggleHeart(this, event)">
+                                    <i class="bi bi-heart" aria-hidden="true"></i>
+                                </button>
+                            </div>
+
+                            <div class="p-3 d-flex flex-column flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="small text-muted text-truncate me-2"><i class="bi bi-geo-alt me-1 text-primary" aria-hidden="true"></i>${escapeHtml(v.communityName)}</div>
+                                    ${statusBadge}
+                                </div>
+
+                                <h3 class="fw-bold text-dark mb-2 text-truncate fs-6" title="${escapeHtml(v.name)}">
+                                    ${escapeHtml(v.name)}
+                                </h3>
+
+                                <div class="mb-3">
+                                    ${priceFormatted}
+                                </div>
+
+                                <div class="small text-secondary mb-3 mt-auto">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-person me-1 text-muted" aria-hidden="true"></i>
+                                        <span class="text-truncate">Chủ xe: <strong>${escapeHtml(v.ownerName)}</strong></span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-shield-check me-1 text-success" aria-hidden="true"></i>
+                                        <span class="text-truncate">${escapeHtml(v.condition || 'Tình trạng tốt')}</span>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-outline-primary rounded-pill w-100 fw-semibold btn-sm py-2" onclick="openMarketDetailModal(${v.id})" aria-label="Xem chi tiết và đặt thuê xe ${escapeHtml(v.name)}">
+                                    <i class="bi bi-eye me-1" aria-hidden="true"></i>Xem chi tiết &amp; Đặt thuê
+                                </button>
+                            </div>
+                        </article>
+                    </div>
+                `;
+            });
+
+            $('#vehicleGridContainer').html(html);
+        }
+
+        function openMarketDetailModal(id) {
+            $('#marketDetailContent').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div><div class="mt-2 text-muted">Đang tải thông tin xe...</div></div>');
+            detailModalInstance.show();
+
+            $.get('/Vehicle/Details', { id: id })
+                .done(function (res) {
+                    if (!res.success) {
+                        $('#marketDetailContent').html(`<div class="alert alert-warning">${escapeHtml(res.message)}</div>`);
+                        return;
+                    }
+
+                    const v = res.data;
+                    const isFree = v.shareType === 'Free' || v.price === 0;
+                    const priceDisplay = isFree 
+                        ? '<span class="text-success fw-bold fs-4">Miễn phí</span>' 
+                        : `<span class="text-primary fw-bold fs-4">${Number(v.price).toLocaleString('vi-VN')} đ</span> <span class="text-muted">/ ngày</span>`;
+
+                    const primaryImg = (v.images && v.images.length > 0) ? v.images[0] : 'https://placehold.co/600x400?text=ShareRide';
+
+                    $('#marketDetailContent').html(`
+                        <div class="row g-4">
+                            <!-- Left: Image -->
+                            <div class="col-md-6">
+                                <div class="rounded-4 overflow-hidden shadow-sm mb-3" style="max-height: 280px;">
+                                    <img src="${escapeHtml(primaryImg)}" alt="${escapeHtml(v.name)}" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=ShareRide';">
+                                </div>
+                                <div class="p-3 bg-light rounded-3">
+                                    <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-info-circle me-2 text-primary"></i>Thông tin chủ sở hữu</h6>
+                                    <div class="small text-secondary mb-1">Chủ xe: <strong>${escapeHtml(v.ownerName)}</strong></div>
+                                    <div class="small text-secondary mb-1">Khu dân cư: <strong>${escapeHtml(v.communityName)}</strong></div>
+                                    <div class="small text-secondary">Đánh giá uy tín: <span class="text-warning fw-bold"><i class="bi bi-star-fill text-warning me-1"></i>4.9/5.0</span> (Cộng đồng xác thực)</div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Info & Rent Form -->
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge bg-primary rounded-pill">${escapeHtml(v.categoryName)}</span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">${escapeHtml(v.statusName)}</span>
+                                </div>
+                                <h4 class="fw-bold text-dark mb-2">${escapeHtml(v.name)}</h4>
+                                <div class="mb-3">${priceDisplay}</div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-secondary mb-1">Tình trạng thực tế</label>
+                                    <p class="small text-dark mb-0">${escapeHtml(v.condition || 'Phương tiện trong tình trạng hoạt động tốt.')}</p>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-secondary mb-1">Mô tả chi tiết</label>
+                                    <p class="small text-secondary mb-0">${escapeHtml(v.description || 'Chưa có mô tả bổ sung từ chủ xe.')}</p>
+                                </div>
+
+                                <!-- Booking form card -->
+                                <div class="border rounded-3 p-3 bg-white shadow-sm mt-3">
+                                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-calendar-check me-2 text-primary"></i>Gửi yêu cầu thuê</h6>
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-6">
+                                            <label class="small text-muted">Bắt đầu</label>
+                                            <input type="date" class="form-control form-control-sm" id="bookingStartDate" value="${new Date().toISOString().split('T')[0]}" />
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small text-muted">Kết thúc</label>
+                                            <input type="date" class="form-control form-control-sm" id="bookingEndDate" value="${new Date(Date.now() + 86400000).toISOString().split('T')[0]}" />
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary w-100 rounded-pill fw-semibold py-2 mt-2" onclick="submitBookingRequest(${v.id}, '${escapeHtml(v.name)}')">
+                                        <i class="bi bi-send me-1"></i>Xác nhận đặt thuê
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                })
+                .fail(function () {
+                    $('#marketDetailContent').html('<div class="alert alert-danger">Không thể tải thông tin chi tiết xe.</div>');
+                });
+        }
+
+        function submitBookingRequest(vehicleId, vehicleName) {
+            const start = $('#bookingStartDate').val();
+            const end = $('#bookingEndDate').val();
+            if (!start || !end) {
+                alert('Vui lòng chọn thời gian bắt đầu và kết thúc!');
+                return;
+            }
+
+            detailModalInstance.hide();
+            alert(`🎉 Gửi yêu cầu đặt thuê thành công!\n\nPhương tiện: ${vehicleName}\nThời gian: từ ${start} đến ${end}.\nChủ xe sẽ nhận được thông báo và liên hệ lại với bạn ngay.`);
+        }
+
+        function toggleHeart(btn, event) {
+            event.stopPropagation();
+            const icon = $(btn).find('i');
+            if (icon.hasClass('bi-heart')) {
+                icon.removeClass('bi-heart').addClass('bi-heart-fill text-danger');
+            } else {
+                icon.removeClass('bi-heart-fill text-danger').addClass('bi-heart');
+            }
+        }
+
+        function resetMarketFilter() {
+            $('#marketSearchKeyword').val('');
+            $('#marketFilterCategory').val('');
+            $('#marketFilterCommunity').val('');
+            $('#marketFilterShareType').val('');
+            $('#marketSortBy').val('newest');
+            $('.quick-cat-btn').removeClass('btn-primary text-white').addClass('btn-outline-secondary');
+            $('.quick-cat-btn[data-cat-id=""]').removeClass('btn-outline-secondary').addClass('btn-primary text-white');
+            loadMarketVehicles();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return $('<div>').text(text).html();
+        }
+    </script>
+}
