@@ -7,114 +7,105 @@
     var users = ViewBag.Users as IEnumerable<dynamic> ?? new List<dynamic>();
 }
 
-<div class="container-fluid py-3">
-    <!-- Header & Action Buttons -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom">
-        <div>
-            <h2 class="h3 fw-bold text-dark mb-0">
-                <i class="bi bi-car-front text-primary me-2"></i>Quản lý phương tiện
-            </h2>
-        </div>
-        <div class="mt-2 mt-md-0 d-flex gap-2">
-            <a asp-controller="Vehicle" asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class="bi bi-arrow-left me-1"></i>Về trang tìm xe
-            </a>
-            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="openCreateModal()">
-                <i class="bi bi-plus-lg me-1"></i>Thêm phương tiện mới
-            </button>
-        </div>
-    </div>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Quản trị</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Quản lý phương tiện</li>
+    </ol>
+</nav>
 
-    <!-- Alert thông báo nổi -->
-    <div id="alertContainer"></div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Quản lý phương tiện</h1>
+    <button type="button" class="btn btn-primary btn-sm" onclick="openCreateModal()">
+        <i class="bi bi-plus-lg me-1"></i>Thêm phương tiện mới
+    </button>
+</div>
 
-    <!-- Bộ lọc & Tìm kiếm -->
-    <div class="card shadow-sm border-0 mb-4 bg-light">
-        <div class="card-body">
-            <form id="filterForm" class="row g-2 align-items-center" onsubmit="event.preventDefault(); loadVehicles();">
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Từ khóa tìm kiếm</label>
-                    <input type="text" id="filterKeyword" class="form-control form-control-sm" placeholder="Tên xe, mô tả...">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Danh mục</label>
-                    <select id="filterCategory" class="form-select form-select-sm">
-                        <option value="">-- Tất cả danh mục --</option>
-                        @foreach (var c in categories)
-                        {
-                            <option value="@c.Id">@c.Name</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Khu dân cư</label>
-                    <select id="filterCommunity" class="form-select form-select-sm">
-                        <option value="">-- Tất cả khu dân cư --</option>
-                        @foreach (var com in communities)
-                        {
-                            <option value="@com.Id">@com.Name</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold">Trạng thái</label>
-                    <select id="filterStatus" class="form-select form-select-sm">
-                        <option value="">-- Tất cả --</option>
-                        <option value="Available">Sẵn sàng</option>
-                        <option value="InUse">Đang sử dụng</option>
-                        <option value="Maintenance">Bảo trì</option>
-                        <option value="Inactive">Ngừng hoạt động</option>
-                    </select>
-                </div>
-                <div class="col-md-1 d-flex align-items-end pt-3">
-                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" title="Đặt lại bộ lọc" onclick="resetFilter()">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div id="alertContainer"></div>
 
-    <!-- Bảng danh sách phương tiện -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 fw-bold text-dark">
-                Danh sách phương tiện (<span id="totalCount">0</span>)
-            </h6>
-            <button class="btn btn-sm btn-outline-primary" onclick="loadVehicles()">
-                <i class="bi bi-arrow-clockwise"></i> Tải lại
-            </button>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 50px;" class="text-center">#</th>
-                            <th style="width: 90px;" class="text-center">Ảnh</th>
-                            <th>Tên phương tiện</th>
-                            <th>Danh mục</th>
-                            <th>Chủ sở hữu & Khu vực</th>
-                            <th>Hình thức & Giá</th>
-                            <th>Trạng thái</th>
-                            <th style="width: 190px;" class="text-center">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="vehicleTableBody">
-                        <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">
-                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                                Đang tải danh sách phương tiện...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+<div class="card shadow-sm mb-4">
+    <div class="card-body bg-light">
+        <form id="filterForm" class="row g-2 align-items-center" onsubmit="event.preventDefault(); loadVehicles();">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Từ khóa tìm kiếm</label>
+                <input type="text" id="filterKeyword" class="form-control form-control-sm" placeholder="Tên xe, mô tả...">
             </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Danh mục</label>
+                <select id="filterCategory" class="form-select form-select-sm">
+                    <option value="">-- Tất cả danh mục --</option>
+                    @foreach (var c in categories)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Khu dân cư</label>
+                <select id="filterCommunity" class="form-select form-select-sm">
+                    <option value="">-- Tất cả khu dân cư --</option>
+                    @foreach (var com in communities)
+                    {
+                        <option value="@com.Id">@com.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Trạng thái</label>
+                <select id="filterStatus" class="form-select form-select-sm">
+                    <option value="">-- Tất cả --</option>
+                    <option value="Available">Sẵn sàng</option>
+                    <option value="InUse">Đang sử dụng</option>
+                    <option value="Maintenance">Bảo trì</option>
+                    <option value="Inactive">Ngừng hoạt động</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end pt-3">
+                <button type="button" class="btn btn-sm btn-outline-secondary w-100" title="Đặt lại" onclick="resetFilter()">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 fw-bold text-dark">
+            Danh sách phương tiện (<span id="totalCount">0</span>)
+        </h6>
+        <button class="btn btn-sm btn-outline-primary" onclick="loadVehicles()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Tải lại
+        </button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered align-middle mb-0">
+                <thead class="table-light small">
+                    <tr>
+                        <th style="width: 50px;" class="text-center">#</th>
+                        <th style="width: 80px;" class="text-center">Ảnh</th>
+                        <th>Tên phương tiện</th>
+                        <th>Danh mục</th>
+                        <th>Chủ sở hữu &amp; Khu dân cư</th>
+                        <th>Hình thức &amp; Giá</th>
+                        <th>Trạng thái</th>
+                        <th style="width: 170px;" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicleTableBody" class="small">
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                            Đang tải danh sách phương tiện...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-<!-- MODAL CHI TIẾT PHƯƠNG TIỆN -->
 <div class="modal fade" id="vehicleDetailModal" tabindex="-1" aria-labelledby="vehicleDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -129,9 +120,6 @@
     </div>
 </div>
 
-<!-- ============================================================== -->
-<!-- MODAL THÊM / CẬP NHẬT PHƯƠNG TIỆN -->
-<!-- ============================================================== -->
 <div class="modal fade" id="vehicleModal" tabindex="-1" aria-labelledby="vehicleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -140,20 +128,17 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Vùng thông báo lỗi trong modal -->
                 <div id="modalAlert" class="alert alert-danger d-none" role="alert"></div>
 
                 <form id="vehicleForm">
                     <input type="hidden" id="vehicleId" value="0" />
 
                     <div class="row g-3">
-                        <!-- Tên xe -->
                         <div class="col-md-8">
                             <label class="form-label fw-semibold">Tên phương tiện <span class="text-danger">*</span></label>
-                            <input type="text" id="vehicleName" class="form-control" required placeholder="VD: Xe máy Honda Vision 2023" />
+                            <input type="text" id="vehicleName" class="form-control" required placeholder="VD: Toyota Vios 2022" />
                         </div>
 
-                        <!-- Danh mục -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Danh mục <span class="text-danger">*</span></label>
                             <select id="vehicleCategory" class="form-select" required>
@@ -165,7 +150,6 @@
                             </select>
                         </div>
 
-                        <!-- Chủ xe -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Chủ sở hữu <span class="text-danger">*</span></label>
                             <select id="vehicleOwner" class="form-select" required>
@@ -177,9 +161,8 @@
                             </select>
                         </div>
 
-                        <!-- Khu dân cư -->
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Khu dân cư / Cộng đồng <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold">Khu dân cư <span class="text-danger">*</span></label>
                             <select id="vehicleCommunity" class="form-select" required>
                                 <option value="">-- Chọn khu dân cư --</option>
                                 @foreach (var com in communities)
@@ -189,7 +172,6 @@
                             </select>
                         </div>
 
-                        <!-- Hình thức chia sẻ -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Hình thức chia sẻ</label>
                             <select id="vehicleShareType" class="form-select" onchange="togglePriceInput()">
@@ -198,14 +180,11 @@
                             </select>
                         </div>
 
-                        <!-- Giá thuê -->
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Giá thuê (VNĐ)</label>
+                            <label class="form-label fw-semibold">Giá thuê (VNĐ/ngày)</label>
                             <input type="number" id="vehiclePrice" class="form-control" value="0" min="0" step="1000" disabled />
-                            <small class="text-muted">Chỉ áp dụng khi hình thức là "Cho thuê"</small>
                         </div>
 
-                        <!-- Trạng thái -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Trạng thái</label>
                             <select id="vehicleStatus" class="form-select">
@@ -218,36 +197,31 @@
                             </select>
                         </div>
 
-                        <!-- Tình trạng kỹ thuật -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Tình trạng thực tế</label>
                             <input type="text" id="vehicleCondition" class="form-control" placeholder="VD: Mới 95%, lốp mới thay..." />
                         </div>
 
-                        <!-- Đường dẫn ảnh -->
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Đường dẫn hình ảnh (URL)</label>
-                            <input type="url" id="vehicleImageUrl" class="form-control" placeholder="https://example.com/hinh-anh-xe.jpg" oninput="previewImage(this.value)" />
+                            <label class="form-label fw-semibold">Đường dẫn hình ảnh</label>
+                            <input type="url" id="vehicleImageUrl" class="form-control" placeholder="/images/vehicles/toyota-vios.jpg hoặc URL" oninput="previewImage(this.value)" />
                             <div class="mt-2 text-center">
                                 <img id="imagePreview" src="" alt="Xem trước ảnh" class="img-thumbnail d-none" style="max-height: 120px;" />
                             </div>
                         </div>
 
-                        <!-- Mô tả chi tiết -->
                         <div class="col-12">
                             <label class="form-label fw-semibold">Mô tả chi tiết</label>
-                            <textarea id="vehicleDescription" class="form-control" rows="3" placeholder="Thông tin thêm về địa điểm nhận xe, lưu ý khi mượn/thuê..."></textarea>
+                            <textarea id="vehicleDescription" class="form-control" rows="3" placeholder="Thông tin chi tiết về phương tiện..."></textarea>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-lg me-1"></i>Đóng
-                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 <button type="button" class="btn btn-primary" id="btnSaveVehicle" onclick="saveVehicle()">
                     <span id="btnSaveSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    <i class="bi bi-check2-circle me-1"></i><span id="btnSaveText">Lưu dữ liệu</span>
+                    <span id="btnSaveText">Lưu dữ liệu</span>
                 </button>
             </div>
         </div>
@@ -256,7 +230,6 @@
 
 @section Scripts {
     <script>
-        // Modal bootstrap instance
         let vehicleModalInstance = null;
         let vehicleDetailModalInstance = null;
 
@@ -264,16 +237,8 @@
             vehicleModalInstance = new bootstrap.Modal(document.getElementById('vehicleModal'));
             vehicleDetailModalInstance = new bootstrap.Modal(document.getElementById('vehicleDetailModal'));
 
-            // Đọc từ khóa tìm kiếm từ query URL nếu được truyền từ trang chủ
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialKeyword = urlParams.get('keyword');
-            if (initialKeyword) {
-                $('#filterKeyword').val(initialKeyword);
-            }
-
             loadVehicles();
 
-            // Lắng nghe sự kiện gõ tìm kiếm với debounce nhẹ
             let timeout = null;
             $('#filterKeyword').on('keyup', function () {
                 clearTimeout(timeout);
@@ -300,7 +265,7 @@
             `);
 
             $.ajax({
-                url: '/Vehicle/GetAll',
+                url: '/Admin/Vehicle/GetAll',
                 type: 'GET',
                 data: {
                     categoryId: categoryId,
@@ -315,7 +280,7 @@
                         showAlert('danger', res.message || 'Lỗi khi tải dữ liệu!');
                     }
                 },
-                error: function (xhr) {
+                error: function () {
                     showAlert('danger', 'Không thể kết nối đến máy chủ.');
                 }
             });
@@ -338,11 +303,11 @@
             let html = '';
             data.forEach((item, index) => {
                 const imgTag = item.imageUrl 
-                    ? `<img src="${item.imageUrl}" class="rounded" style="width: 60px; height: 45px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/60x45?text=No+Img';">`
-                    : `<span class="badge bg-light text-secondary border p-2">Không ảnh</span>`;
+                    ? `<img src="${escapeHtml(item.imageUrl)}" class="rounded" style="width: 55px; height: 40px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/55x40?text=No+Img';">`
+                    : `<span class="badge bg-light text-secondary border p-1">Không ảnh</span>`;
 
                 const priceDisplay = item.shareType === 'Free' || item.price === 0
-                    ? `<span class="badge bg-success-subtle text-success border border-success-subtle">Miễn phí</span>`
+                    ? `<span class="badge bg-success">Miễn phí</span>`
                     : `<strong>${Number(item.price).toLocaleString('vi-VN')} đ</strong>`;
 
                 let statusBadge = '<span class="badge bg-secondary">Không rõ</span>';
@@ -365,8 +330,8 @@
                         <td class="text-center fw-semibold text-muted">${index + 1}</td>
                         <td class="text-center">${imgTag}</td>
                         <td>
-                            <div class="fw-bold text-dark">${escapeHtml(item.name)}</div>
-                            <small class="text-muted text-truncate d-block" style="max-width: 250px;">${escapeHtml(item.description || item.condition || 'Chưa có mô tả')}</small>
+                            <div class="fw-bold">${escapeHtml(item.name)}</div>
+                            <small class="text-muted text-truncate d-block" style="max-width: 220px;">${escapeHtml(item.description || item.condition || 'Chưa có mô tả')}</small>
                         </td>
                         <td><span class="badge bg-light text-dark border">${escapeHtml(item.categoryName)}</span></td>
                         <td>
@@ -376,14 +341,14 @@
                         <td>${priceDisplay}</td>
                         <td>${statusBadge}</td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-outline-info me-1" title="Xem chi tiết" onclick="openDetailModal(${item.id})">
-                                <i class="bi bi-eye me-1"></i>Chi tiết
+                            <button class="btn btn-sm btn-outline-info me-1" title="Chi tiết" onclick="openDetailModal(${item.id})">
+                                <i class="bi bi-eye"></i>
                             </button>
                             <button class="btn btn-sm btn-outline-primary me-1" title="Chỉnh sửa" onclick="openEditModal(${item.id})">
-                                <i class="bi bi-pencil-square me-1"></i>Sửa
+                                <i class="bi bi-pencil-square"></i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger" title="Xóa" onclick="deleteVehicle(${item.id})">
-                                <i class="bi bi-trash3 me-1"></i>Xóa
+                                <i class="bi bi-trash3"></i>
                             </button>
                         </td>
                     </tr>
@@ -404,7 +369,7 @@
                     }
                     const v = res.data;
                     const images = (v.images || []).map(url => `<img src="${escapeHtml(url)}" class="rounded border me-2 mb-2" style="width:110px;height:80px;object-fit:cover" onerror="this.remove()">`).join('');
-                    const price = v.shareType === 'Free' ? '<span class="badge bg-success">Miễn phí</span>' : `${Number(v.price).toLocaleString('vi-VN')} đ`;
+                    const price = v.shareType === 'Free' ? '<span class="badge bg-success">Miễn phí</span>' : `${Number(v.price).toLocaleString('vi-VN')} đ/ngày`;
                     $('#vehicleDetailBody').html(`
                         <div class="row g-4">
                             <div class="col-md-5"><div class="bg-light rounded p-3 text-center min-vh-25">${images || '<span class="text-muted">Chưa có hình ảnh</span>'}</div></div>
@@ -440,7 +405,7 @@
             $('#modalAlert').addClass('d-none').html('');
 
             $.ajax({
-                url: '/Vehicle/GetById',
+                url: '/Admin/Vehicle/GetById',
                 type: 'GET',
                 data: { id: id },
                 success: function (res) {
@@ -516,7 +481,7 @@
             };
 
             const isUpdate = id > 0;
-            const url = isUpdate ? '/Vehicle/Update' : '/Vehicle/Create';
+            const url = isUpdate ? '/Admin/Vehicle/Update' : '/Admin/Vehicle/Create';
 
             setSaveButtonLoading(true);
 
@@ -539,7 +504,7 @@
                         showModalAlert(errHtml);
                     }
                 },
-                error: function (xhr) {
+                error: function () {
                     setSaveButtonLoading(false);
                     showModalAlert('Lỗi xử lý trên máy chủ. Vui lòng thử lại.');
                 }
@@ -552,7 +517,7 @@
             }
 
             $.ajax({
-                url: `/Vehicle/Delete?id=${id}`,
+                url: `/Admin/Vehicle/Delete?id=${id}`,
                 type: 'POST',
                 success: function (res) {
                     if (res.success) {
@@ -592,7 +557,7 @@
 
         function showAlert(type, message) {
             const html = `
-                <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
                     ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
