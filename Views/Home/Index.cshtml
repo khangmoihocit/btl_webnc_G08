@@ -18,12 +18,9 @@
 }
 </script>
 
-<!-- ============================================================== -->
-<!-- 1. HERO BANNER SECTION -->
-<!-- ============================================================== -->
+
 <section class="hero-section" aria-label="Banner giới thiệu và tìm kiếm xe">
     <div class="container py-3">
-        <!-- Headings & Description on Left -->
         <div class="mb-4" style="max-width: 640px;">
             <h1 class="hero-title-main mb-3">
                 Chia sẻ phương tiện
@@ -34,9 +31,7 @@
             </p>
         </div>
 
-        <!-- Wide Search Card matching the mockup (Căn giữa) -->
         <div class="hero-search-card mx-auto">
-            <!-- Category Tabs -->
             <div class="d-flex align-items-center gap-2 mb-3 overflow-auto pb-1" style="white-space: nowrap;">
                 <button type="button" class="sr-search-tab active" data-type="all" onclick="selectSearchTab(this, 'all')" aria-label="Xem tất cả loại phương tiện">
                     <i class="bi bi-car-front-fill me-1" aria-hidden="true"></i> Tất cả
@@ -81,9 +76,6 @@
     </div>
 </section>
 
-<!-- ============================================================== -->
-<!-- 2. CORE VALUE / FEATURE HIGHLIGHTS -->
-<!-- ============================================================== -->
 <section class="py-4 bg-white border-bottom" aria-labelledby="core-values-heading">
     <div class="container">
         <h2 id="core-values-heading" class="visually-hidden">Giá trị cốt lõi của nền tảng ShareRide</h2>
@@ -145,9 +137,6 @@
     </div>
 </section>
 
-<!-- ============================================================== -->
-<!-- 3. FEATURED VEHICLES SECTION -->
-<!-- ============================================================== -->
 <section class="py-5" style="background-color: #f8fafc;" aria-labelledby="featured-vehicles-heading">
     <div class="container position-relative">
         <!-- Section Header -->
@@ -265,9 +254,6 @@
     </div>
 </section>
 
-<!-- ============================================================== -->
-<!-- 4. HOW IT WORKS SECTION (Cách hoạt động) -->
-<!-- ============================================================== -->
 <section id="huong-dan" class="py-5 bg-white" aria-labelledby="how-it-works-heading">
     <div class="container text-center">
         <h2 id="how-it-works-heading" class="fw-bold text-dark mb-4 mb-md-5 fs-4">Cách thức hoạt động</h2>
@@ -326,5 +312,6 @@
             $(element).addClass('active');
             $('#searchVehicleType').val(type);
         }
-    </script>
+
+   </script>
 }
