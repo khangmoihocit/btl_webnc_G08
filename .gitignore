@@ -38,4 +38,4 @@ wwwroot/uploads/*
 !wwwroot/uploads/.gitkeep
 
 txt/
-Migrations/
+# Migrations được lưu cùng source để tạo schema.

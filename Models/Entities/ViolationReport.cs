@@ -18,6 +18,10 @@ namespace btl_webnc_G08.Models.Entities
         public ReportStatus Status { get; set; } = ReportStatus.Pending;
         [MaxLength(1000)] public string? AdminNote { get; set; }
 
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? HandledAt { get; set; }
+        [Timestamp] public byte[] Version { get; set; } = [];
+
         public virtual User Reporter { get; set; } = null!;
     }
 }

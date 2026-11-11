@@ -448,7 +448,8 @@
                                             <input type="date" class="form-control form-control-sm" id="bookingEndDate" value="${new Date(Date.now() + 86400000).toISOString().split('T')[0]}" />
                                         </div>
                                     </div>
-                                    <button type="button" class="btn btn-primary w-100 rounded-pill fw-semibold py-2 mt-2" onclick="submitBookingRequest(${v.id}, '${escapeHtml(v.name)}')">
+                                    <div id="bookingNotice" class="alert alert-warning mt-3 mb-2 d-none" role="status" aria-live="polite"></div>
+                                    <button type="button" class="btn btn-primary w-100 rounded-pill fw-semibold py-2 mt-2" onclick="submitBookingRequest()">
                                         <i class="bi bi-send me-1"></i>Xác nhận đặt thuê
                                     </button>
                                 </div>
@@ -461,16 +462,17 @@
                 });
         }
 
-        function submitBookingRequest(vehicleId, vehicleName) {
+        function submitBookingRequest() {
             const start = $('#bookingStartDate').val();
             const end = $('#bookingEndDate').val();
+            const notice = $('#bookingNotice').removeClass('d-none');
             if (!start || !end) {
-                alert('Vui lòng chọn thời gian bắt đầu và kết thúc!');
-                return;
+                notice.text('Vui lòng chọn ngày bắt đầu và ngày kết thúc.');
+            } else if (end <= start) {
+                notice.text('Ngày kết thúc phải sau ngày bắt đầu.');
+            } else {
+                notice.text('Chức năng gửi yêu cầu đặt thuê đang được phát triển. Yêu cầu chưa được gửi đến chủ xe.');
             }
-
-            detailModalInstance.hide();
-            alert(`🎉 Gửi yêu cầu đặt thuê thành công!\n\nPhương tiện: ${vehicleName}\nThời gian: từ ${start} đến ${end}.\nChủ xe sẽ nhận được thông báo và liên hệ lại với bạn ngay.`);
         }
 
         function toggleHeart(btn, event) {

@@ -136,16 +136,8 @@ namespace btl_webnc_G08.Data
                 context.SaveChanges();
 
                 // 4. SEED 30 PHƯƠNG TIỆN MẪU ĐA DẠNG
-                if (context.Vehicles.Count() < 25)
+                if (!context.Vehicles.Any())
                 {
-                    // Xóa dữ liệu cũ nếu chưa có đặt xe để tạo lại chuẩn 30 xe
-                    if (!context.Bookings.Any())
-                    {
-                        context.VehicleImages.RemoveRange(context.VehicleImages);
-                        context.Vehicles.RemoveRange(context.Vehicles);
-                        context.SaveChanges();
-                    }
-
                     var allUsers = context.Users.ToList();
                     var allCategories = context.VehicleCategories.ToList();
                     var allCommunities = context.Communities.ToList();
@@ -447,8 +439,9 @@ namespace btl_webnc_G08.Data
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                throw new InvalidOperationException("Không thể khởi tạo dữ liệu mẫu.", ex);
             }
         }
     }
