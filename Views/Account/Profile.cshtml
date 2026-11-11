@@ -1,0 +1,9 @@
+@model btl_webnc_G08.Models.ViewModels.ProfileVM
+@{ViewData["Title"]="Hồ sơ cá nhân";ViewData["Robots"]="noindex, nofollow";}
+<div class="container py-5" style="max-width:640px"><h1>Hồ sơ cá nhân</h1>@if(TempData["Message"]!=null){<p class="alert alert-success">@TempData["Message"]</p>}
+<form asp-action="Profile" method="post" class="d-grid gap-3"><div asp-validation-summary="All" class="text-danger"></div>
+<label>Họ và tên <input asp-for="FullName" class="form-control" required maxlength="100" /></label>
+<label>Email <input class="form-control" value="@ViewBag.Email" readonly /></label>
+<label>Cộng đồng <input class="form-control" value="@(ViewBag.Community ?? "Chưa cập nhật")" readonly /></label>
+<label>Số điện thoại <input asp-for="Phone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" class="form-control" required /></label>
+<button class="btn btn-primary">Lưu thông tin</button></form></div>

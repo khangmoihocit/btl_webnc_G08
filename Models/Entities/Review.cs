@@ -17,6 +17,10 @@ namespace btl_webnc_G08.Models.Entities
         [MaxLength(1000)] public string? Comment { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [MaxLength(500)] public string? Reply { get; set; }
+        public DateTime? RepliedAt { get; set; }
+        public bool IsHidden { get; set; }
+
         public virtual Booking Booking { get; set; } = null!;
         public virtual User Reviewer { get; set; } = null!;
         public virtual User Reviewee { get; set; } = null!;

@@ -32,6 +32,7 @@ namespace btl_webnc_G08.Data
             builder.Entity<User>(b =>
             {
                 b.HasIndex(u => u.Email).IsUnique();
+                b.HasIndex(u => u.PhoneNumber).IsUnique().HasFilter("[PhoneNumber] IS NOT NULL");
                 b.HasOne(u => u.Community)
                  .WithMany(c => c.Members)
                  .HasForeignKey(u => u.CommunityId)

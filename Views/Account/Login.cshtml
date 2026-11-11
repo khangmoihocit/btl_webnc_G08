@@ -1,0 +1,4 @@
+@model btl_webnc_G08.Models.ViewModels.LoginVM
+@{ViewData["Title"]="Đăng nhập"; ViewData["Robots"]="noindex, nofollow";}
+<div class="container py-5" style="max-width:640px"><h1>Đăng nhập</h1>@if(TempData["Message"]!=null){<p class="alert alert-info">@TempData["Message"]</p>}
+<form asp-action="Login" method="post" class="d-grid gap-3"><div asp-validation-summary="All" class="text-danger"></div><label>Email <input asp-for="Email" class="form-control" /></label><label>Mật khẩu <input asp-for="Password" class="form-control" /></label><button class="btn btn-primary">Đăng nhập</button><a asp-action="Register">Tạo tài khoản</a></form></div>

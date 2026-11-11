@@ -1,0 +1,9 @@
+@model btl_webnc_G08.Models.ViewModels.RegisterVM
+@{ViewData["Title"]="Đăng ký"; ViewData["Robots"]="noindex, nofollow";}
+<div class="container py-5" style="max-width:640px"><h1>Đăng ký cư dân</h1><p>Tài khoản cần được quản trị viên duyệt trước khi đăng nhập.</p>
+<form asp-action="Register" method="post" class="d-grid gap-3"><div asp-validation-summary="All" class="text-danger"></div>
+<label>Họ và tên <input asp-for="FullName" class="form-control" /></label><label>Email <input asp-for="Email" class="form-control" /></label>
+<label>Số điện thoại <input asp-for="Phone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" class="form-control" required /></label>
+<label>Cộng đồng <select asp-for="CommunityId" class="form-select"><option value="">Chọn cộng đồng</option>@foreach(var c in ViewBag.Communities){<option value="@c.Id">@c.Name</option>}</select></label>
+<label>Mật khẩu <input asp-for="Password" class="form-control" /></label><label>Nhập lại mật khẩu <input asp-for="ConfirmPassword" class="form-control" /></label>
+<button class="btn btn-primary" type="submit">Đăng ký</button></form></div>
